@@ -98,7 +98,15 @@ fn uri_decode(x: String) -> String {
   decode_percent(plus)
 }
 
+@external(erlang, "uri_string", "percent_decode")
+fn erlang_percent_decode(bs: BitString) -> BitString
+
 fn decode_percent(s: String) -> String {
-  // Simplified URL decode - just replace + with spaces for now
-  string.replace(s, "+", " ")
+  // Decode percent-encoded sequences using Erlang's uri_string module
+  let bytes = string.to_utf8(s)
+  let decoded = erlang_percent_decode(bytes)
+  case string.from_utf8(decoded) {
+    Ok(text) -> text
+    Error(_) -> s
+  }
 }
