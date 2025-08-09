@@ -12,9 +12,6 @@ import link_store as links_store
 import view
 
 pub fn main() {
-  // Start the link store actor once
-  let assert Ok(link_store_actor) = links_store.start()
-
   // Forhåndsgenerert 404-respons
   let empty = mist.Bytes(bytes_tree.new())
   let not_found = res.set_body(res.new(404), empty)
@@ -25,7 +22,7 @@ pub fn main() {
   ) {
     case string.split(r.path, "/") {
       ["", ""] -> {
-        let links = links_store.get_all_from_store(link_store_actor)
+        let links = links_store.get_all()
         render_html(view.page(links))
       }
 
@@ -36,7 +33,7 @@ pub fn main() {
         case url {
           "" -> redirect("/")
           _ -> {
-            links_store.add_link_to_store(link_store_actor, url, title)
+            links_store.add_link(url, title)
             redirect("/")
           }
         }
