@@ -22,3 +22,14 @@ Further documentation can be found at <https://hexdocs.pm/mnemosyne>.
 gleam run   # Run the project
 gleam test  # Run the tests
 ```
+
+## Bookmarklet
+
+Links can be added directly from the browser using the `/add/confirm` route:
+
+```
+/add/confirm?url=<URL>&title=<TITLE>
+```
+
+The link is stored and the response redirects back to the provided URL
+with a plain text confirmation, making it suitable for bookmarklets.

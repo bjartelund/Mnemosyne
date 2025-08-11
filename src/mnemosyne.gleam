@@ -26,6 +26,19 @@ pub fn main() {
         render_html(view.page(links))
       }
 
+      ["", "add", "confirm"] -> {
+        let params = r.query |> option.unwrap("") |> parse_qs
+        let url = dict_get(params, "url") |> option.unwrap("")
+        let title = dict_get(params, "title") |> option.unwrap(url)
+        case url {
+          "" -> redirect("/")
+          _ -> {
+            links_store.add_link(url, title)
+            redirect_with_message(url, "Added " <> title)
+          }
+        }
+      }
+
       ["", "add"] -> {
         let params = r.query |> option.unwrap("") |> parse_qs
         let url = dict_get(params, "url") |> option.unwrap("")
@@ -57,6 +70,16 @@ fn redirect(location: String) -> res.Response(mist.ResponseData) {
   res.new(302)
   |> res.set_header("Location", location)
   |> res.set_body(mist.Bytes(bytes_tree.from_string("")))
+}
+
+fn redirect_with_message(
+  location: String,
+  message: String,
+) -> res.Response(mist.ResponseData) {
+  res.new(302)
+  |> res.set_header("Location", location)
+  |> res.set_header("content-type", "text/plain; charset=utf-8")
+  |> res.set_body(mist.Bytes(bytes_tree.from_string(message)))
 }
 
 fn render_html(el) -> res.Response(mist.ResponseData) {
