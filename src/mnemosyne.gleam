@@ -1,3 +1,4 @@
+import gleam/bit_array
 import gleam/bytes_tree
 import gleam/erlang/process
 import gleam/http/request as req
@@ -5,7 +6,6 @@ import gleam/http/response as res
 import gleam/list
 import gleam/option
 import gleam/string
-import gleam/bit_array
 import lustre/element
 import mist
 
@@ -100,11 +100,12 @@ fn uri_decode(x: String) -> String {
 }
 
 @external(erlang, "uri_string", "percent_decode")
-fn erlang_percent_decode(bit_array.BitArray) -> bit_array.BitArray
+fn erlang_percent_decode(bit_array: BitArray) -> BitArray
 
 fn decode_percent(s: String) -> String {
-  s
-  |> string.to_utf8
+  let assert Ok(result) = s
+  |> bit_array.from_string
   |> erlang_percent_decode
-  |> string.from_utf8
+  |> bit_array.to_string
+  result
 }
