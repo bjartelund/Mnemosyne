@@ -4,7 +4,9 @@ import gleam/http/request as req
 import gleam/http/response as res
 import gleam/list
 import gleam/option
+import gleam/result
 import gleam/string
+import gleam/uri
 import lustre/element
 import mist
 
@@ -27,7 +29,11 @@ pub fn main() {
       }
 
       ["", "add"] -> {
-        let params = r.query |> option.unwrap("") |> parse_qs
+        let params =
+          r.query
+          |> option.unwrap("")
+          |> uri.parse_query
+          |> result.unwrap([])
         let url = dict_get(params, "url") |> option.unwrap("")
         let title = dict_get(params, "title") |> option.unwrap(url)
         case url {
@@ -66,20 +72,6 @@ fn render_html(el) -> res.Response(mist.ResponseData) {
   |> res.set_body(mist.Bytes(bytes_tree.from_string(html)))
 }
 
-// --- Minimal querystring-parser ("a=1&b=2") → List(#(key, value)) ---
-
-pub fn parse_qs(q: String) -> List(#(String, String)) {
-  q
-  |> string.split("&")
-  |> list.filter(fn(x) { x != "" })
-  |> list.map(fn(pair) {
-    case string.split_once(pair, "=") {
-      Ok(#(k, v)) -> #(uri_decode(k), uri_decode(v))
-      Error(_) -> #(uri_decode(pair), "")
-    }
-  })
-}
-
 fn dict_get(ps: List(#(String, String)), key: String) -> option.Option(String) {
   case
     list.find(ps, fn(pair) {
@@ -90,15 +82,4 @@ fn dict_get(ps: List(#(String, String)), key: String) -> option.Option(String) {
     Ok(#(_, v)) -> option.Some(v)
     Error(_) -> option.None
   }
-}
-
-fn uri_decode(x: String) -> String {
-  // Minimal URL-decode (mellomrom + %XX). For robust løsning: bring inn et lib.
-  let plus = string.replace(x, "+", " ")
-  decode_percent(plus)
-}
-
-fn decode_percent(s: String) -> String {
-  // Simplified URL decode - just replace + with spaces for now
-  string.replace(s, "+", " ")
 }
