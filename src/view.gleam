@@ -71,6 +71,17 @@ pub fn page(links: List(Link)) -> element.Element(a) {
           ],
           items,
         ),
+        html.p([], [
+          html.text("Drag this link to your bookmarks bar: "),
+          html.a(
+            [
+              attr.href(
+                "javascript:(function(){function E(s){return encodeURIComponent(s)}var c=document.querySelector('link[rel=\\\"canonical\\\"]');var u=(c&&c.href)||location.href;var t=document.title;window.open('https://mnemosyne.godkjemi.net/add?url='+E(u)+'&title='+E(t),'_blank')})();",
+              ),
+            ],
+            [html.text("Add to Mnemosyne")],
+          ),
+        ]),
       ],
     ),
   ])
