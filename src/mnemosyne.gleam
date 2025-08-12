@@ -5,6 +5,7 @@ import gleam/http/response as res
 import gleam/list
 import gleam/option
 import gleam/string
+import gleam/bit_array
 import lustre/element
 import mist
 
@@ -98,7 +99,12 @@ fn uri_decode(x: String) -> String {
   decode_percent(plus)
 }
 
+@external(erlang, "uri_string", "percent_decode")
+fn erlang_percent_decode(bit_array.BitArray) -> bit_array.BitArray
+
 fn decode_percent(s: String) -> String {
-  // Simplified URL decode - just replace + with spaces for now
-  string.replace(s, "+", " ")
+  s
+  |> string.to_utf8
+  |> erlang_percent_decode
+  |> string.from_utf8
 }
